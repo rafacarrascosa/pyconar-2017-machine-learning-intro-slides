@@ -1,0 +1,772 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<!-- START OF SLIDES ======================================================= -->
+<!-- START OF SLIDES ======================================================= -->
+<!-- START OF SLIDES ======================================================= -->
+
+
+<section data-markdown><script type="text/template">
+## Introducción al Machine Learning con Python
+
+<br/>
+<br/>
+
+#### Rafael Carrascosa -- Machinalis
+#### rcarrascosa@machinalis.com
+#### 19/11/2017
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Objetivo de la charla
+
+Dar una visión pragamática sobre qué es Machine Learning, que sirva como hoja de ruta para luego aprender los detalles más finos.
+
+Orientada a hackers Python que no tienen ganas de fumarse una pila de fórmulas para entender de qué la va "el machine learning".
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Overview
+
+- Introducción a Machine Learning
+- Introducción a Scikit Learn
+- Introducción a Deep Learning con Keras
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Un cuentito
+
+Tenemos un sitio web que vende cosas
+
+<pre><code>
+{
+  "title": "Auriculares Samsung Originales ...",
+  "price": 80,
+  "initial_quantity": 1,
+  "buying_mode": "buy_it_now",
+  ...
+}
+</code></pre>
+
+<p class="fragment"> <b>¿este articulo es nuevo o es usado? </b></p>
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+"facil, si dice usado es usado"
+
+<pre><code>
+def predict(item):
+    if "usado" in item["title"].lower():
+        return "used"
+    else:
+        return "new"
+</code></pre>
+
+<p class="fragment">Y lo probamos con 100000 articulos conocidos</p>
+
+<div class="fragment">
+<div style="float:left;width:50%;" class="centered">
+<br/>
+<p> Acertamos el 54% de las veces </p>
+</div>
+<div style="float:right;width:50%;padding-right:0px;">
+<img width="200" src="disgust.jpg"/>
+</div>
+</div>
+
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+Miramos un par de los errores...
+
+<pre><code>
+{"title": "Exilio  - Bayer / Gelman",
+ "initial_quantity": 1,
+ ...}
+{"title": "Valija Semirrigida Travelite...",
+ "initial_quantity": 1,
+ ...}
+{"title": "Horno Panadero Convector",
+ "initial_quantity": 1,
+ ...}
+...
+</code></pre>
+
+<p class="fragment">Mmm... <code>initial_quantity: 1<code> </p>
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+"... ademas si vende una sola unidad es usado"
+
+<pre><code>
+def predict(item):
+    if "usado" in item["title"].lower():
+        return "used"
+    else:
+        if item["initial_quantity"] == 1:
+            return "used"
+        else:
+            return "new"
+</code></pre>
+
+<p class="fragment">De nuevo con 100000 articulos conocidos</p>
+
+<div class="fragment">
+<div style="float:left;width:50%;" class="centered">
+<br/>
+<p> Acertamos el 73% de las veces </p>
+</div>
+<div style="float:right;width:50%;padding-right:0px;">
+<img width="250" src="yay.png"/>
+</div>
+</div>
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+"... pero si es silver es nuevo"
+
+<pre><code>
+def predict(item):
+    if "usado" in item["title"].lower():
+        return "used"
+    else:
+        if item["initial_quantity"] == 1:
+            if "silver" in item["listing_type_id"]:
+                return "new"
+            else:
+                return "used"
+        else:
+            return "new"
+</code></pre>
+
+<small class="fragment">De nuevo con 100000 articulos conocidos</small>
+
+<div class="fragment">
+<div style="float:left;width:50%;" class="centered">
+<p> Acertamos el 74% de las veces </p>
+</div>
+<div style="float:right;width:50%;padding-right:0px;">
+<img width="175" src="travolta.gif"/>
+</div>
+</div>
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+<h3> Esto no escala ... </h3>
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+## Definición de Machine Learning
+
+<br/>
+
+Un campo al que le concierne construir funciones sin programarlas explicitamente.
+
+<br/>
+
+Un algoritmo de ML es una <i>factory</i> de funciones: Toma ejemplos y produce una función.
+
+<br/>
+
+<small> Adaptado de https://en.wikipedia.org/wiki/Machine_learning </small>
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+<div style="float:left;width:50%;" class="centered">
+<pre><code>
+def predict(item):
+	# Toda
+	# esta
+	# función
+	# es
+	# generada
+	# automaticamente
+	# a
+	# partir
+	# de
+	# ejemplos
+</code></pre>
+
+</div>
+<div style="float:right;width:50%;padding-right:0px;">
+
+<pre><code>
+def predict(item):
+    if "usado" in item["title"].lower():
+        return "used"
+    else:
+        if item["initial_quantity"] == 1:
+            if "silver" in item["listing_type_id"]:
+                return "new"
+            else:
+                return "used"
+        else:
+            return "new"
+</code></pre>
+</div>
+
+Note:
+- es una mejor práctica de ingenieria
+- la función construida automáticamente se llama modelo
+- el acto de construir un modelo es entrenar
+
+</script></section>
+
+<!-- 15 minutes checkpoint-->
+
+<section data-markdown><script type="text/template">
+
+#### .
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+## Scikit Learn
+
+- Estandar de facto para ML
+- Open Source (BSD)
+- ~7 años de edad
+- 23K stars en github (django 29k stars)
+- Su API promueve mejores prácticas
+- https://github.com/scikit-learn/scikit-learn
+
+Note:
+Scikit learn tiene un punto de vista propio sobre cómo organizar el código de ML
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+### Un arbol de decisión
+
+<div style="float:left;width:70%;" class="centered">
+<br/>
+<pre><code>def predict(item):
+    if "usado" in item["title"].lower():
+        return "used"
+    else:
+        if item["initial_quantity"] == 1:
+            return "used"
+        else:
+            return "new"
+</code></pre>
+</div>
+<div style="float:right;width:30%;padding-right:0px;">
+<br/>
+<img width="300" src="dtree.png"/>
+</div>
+
+Note:
+Nos acercamos al huevo y la gallina
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Decision tree
+
+<pre><code># Configuration
+pipe = make_pipeline(
+  make_union(
+	feature(lambda x: x["title"].lower()),
+	feature(lambda x: str(x["initial_quantity"] == 1)),
+	feature(lambda x: x["listing_type_id"].lower())
+  ),
+  DecisionTreeClassifier()
+)
+
+# Actually building the function
+predictor = pipe.fit(train_data, train_target)
+# Using the function
+prediction = predictor.predict(test_data)
+</code></pre>
+
+<div class="fragment">
+<p> Acertamos el 85% de las veces, en test</p>
+</div>
+
+Note:
+- Este snippet dice mucho, en las siguientes slides lo analizamos
+- predictor se llama 'modelo'
+- el acto de construir un modelo se llama entrenar
+- no solo se construye solo, se construye mejor
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+¿Y esto que es?
+
+<pre><code>...
+feature(lambda x: x["title"].lower()),
+feature(lambda x: str(x["initial_quantity"] == 1)),
+feature(lambda x: x["listing_type_id"].lower())
+...
+</code></pre>
+
+Los algoritmos de ML consumen los datos en un formato especial.
+
+<br/>
+
+Glosario: Cada dato es un 'feature'
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+## Formato de entrada
+
+- Algoritmos de ML consumen vectores de números
+- Cada item un vector, p.ej: `[1, 0, 1]`
+- Cada feature ocupa una posicion en el vector
+- Ejemplo: dice usado, tiene 1 unidad y es no es vendedor silver, se codifica como `[1, 1, 0]`
+- Distintos tipos de datos se codifican distinto
+- Los vectores tienen largo constante
+
+Note:
+- Desacoplar tu problema particular de la implementacion ML
+- La interfaz son vectores de numeros
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+## ¿Que se puede poner en un vector?
+
+- Booleanos
+- <b> Números </b>
+- Enumerados (rojo, verde, azul)
+- <b> Texto </b>
+- <b> Imágenes </b> (con deep learning)
+- Secuencias
+
+Note:
+- Hay muchas formas estandar de codificar tipo de datos
+- Cuando no hay formas estandar recurrir al ingenio y las 3 básicas
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Scikit Learn API
+
+Entrenar un modelo
+
+<pre><code>predictor = DecisionTree().fit(X_train, y_train)
+</code></pre>
+
+- `X_train` son los vectores de features
+- `y_train` es el valor a predecir (p.ej 'new' or 'used')
+- `predictor` es un objeto con el modelo entrenado.
+
+Note:
+- Los nombres de variables son las convenciones de scikit learn
+- Entrenar un modelo toma tiempo
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Scikit Learn API
+
+Predecir con un modelo
+
+<pre><code>y_hat = predictor.predict(X_test)
+</code></pre>
+
+- `X_test` son los vectores de features
+- `y_hat` son las predicciones (p.ej 'new' or 'used')
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## ¿train y test?
+
+<div class="fragment">
+<small>Esto predice perfectamente los ejemplos vistos</small>
+
+<pre><code>memory = {
+	item["title"]: item["condition"] for item in dataset
+}
+
+def predict(item):
+	return memory[item["title"]]
+
+</code></pre>
+<img class="fragment" width=250 src="trollface.jpg"/>
+</div>
+
+
+Note:
+- Este es un extremo, pero hay grises
+- Lo que queremos es 'generalizar'
+- Un truco simple, separar los datos en dos
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+### Decision Trees es solo uno de muchos algoritmos
+
+ - Logistic Regression
+ - Gradiend Boosting
+ - Support Vector Machines
+ - Naive Bayes
+ - ...
+
+<br/>
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+Y todos tienen la misma API.
+
+<pre><code># Configuration
+pipe = make_pipeline(
+  make_union(
+	feature(lambda x: x["title"].lower()),
+	feature(lambda x: str(x["initial_quantity"] == 1)),
+	feature(lambda x: x["listing_type_id"].lower())
+  ),
+  #DecisionTreeClassifier()
+  LogisticRegression()  # <-- Changed here!
+)
+
+# Actually building the function
+predict = pipe.fit(train_data, train_target).predict
+</code></pre>
+
+<p> Este cambio permite acertar el 87% de las veces, en test</p>
+
+Note:
+- Cada algoritmo tiene ventajas y desventajas propias
+- En este caso, nos ayuda el cambio
+- Notar lo simple de cambiar algorimos
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+## Garbage In, Garbage Out
+
+<br/>
+
+- Cambiar algoritmos paga poco
+- Mayores ganancias con mejores features
+- Mejores features alcanzan 91%
+
+<br/>
+
+#### El arte del ML está en construir los features
+
+Note:
+Construir features es proveer info relevante al algoritmo
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## ¿Donde estamos en el ML?
+
+- Vimos clasificación binaria (new or used)
+- Existe clasificación multiclase (rojo, verde o azul)
+- Existe regresión (predecir números reales)
+- Existe aprendizaje sin verdad de campo
+
+<br/>
+
+Y solo hablamos de ML tradicional...
+</script></section>
+
+<!-- 35 minutes checkpoint-->
+
+<section data-markdown><script type="text/template">
+
+#### .
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Deep Learning
+
+<br/>
+
+## Q & A
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+## Deep Learning ¿Que es eso?
+
+- Es una rama del Machine Learning
+- Propone modelos propios para las mismas tareas:
+	- Clasificación
+	- Regresión
+	- etc.
+
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+## ¿Para que me sirve?
+
+<br/>
+
+- Para trabajar con imágenes
+- Para cosas que se pueden convertir a imagenes
+- Y si sos un artista del ML sirve para TODO
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## ¿Que tiene de distinto?
+
+- No hay modelos caja negra
+- Son muy flexibles
+- Requieren mucho involucramiento
+
+Note:
+- La gran dificultad de aprender deep learning es que uno no puede asumir que el modelo es una caja negra.
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## No es facil...
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+### Definición de aprendizaje
+
+<pre><code>#config = [1.2, -4.5, 3.9, ...]
+
+def predict(item, config=config):
+	... # Use config to predict item
+</code></pre>
+
+<div class='fragment'>
+<h3>Aprender</h3>
+
+<p>Encontrar valores para config tal que predict se equivoca lo mínimo posible en train_data.</p>
+
+<p>Los algoritmos que hacen esto estan dados</p>
+</div>
+
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+### Lo que no está dado...
+
+<pre><code>#config = [1.2, -4.5, 3.9, ...]
+
+def predict(item, config=config):
+	... # Use config to predict item
+</code></pre>
+
+Deep Learning consiste:
+ - En elegir cuantos números forman parte de config
+ - Decidir cómo se usan esos números para predecir
+
+Note:
+-Notar que ya no hay más black box!
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Keras
+
+- La más popular para Deep Learning
+- Open Source
+- ~3 años de edad
+- Bancada por google
+- 21K stars en github (django 29k stars)
+- https://github.com/fchollet/keras
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Fashion MNIST
+
+<div>
+<div style="float:left;width:50%;" class="centered">
+<img width="250" src="fashion1.png"/>
+<img width="250" src="fashion2.png"/>
+</div>
+<div style="float:right;width:50%;padding-right:0px;">
+<img width="250" src="fashion3.png"/>
+<img width="250" src="fashion4.png"/>
+</div>
+</div>
+
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Fashion MNIST
+
+ - Hay 10 clases de objetos
+ - Tarea: Idenficar el objeto
+ - Imagen de 28x28
+ - Features == pixeles crudos
+ - P.ej image = [0.2, 0.3, 0.15, ...]
+ - 60k train, 10k test
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Deep Learning con Keras
+
+<pre><code>...
+model = Sequential()
+model.add(Dense(128, activation='relu', input_shape=(784,)))
+model.add(Dense(128, activation='relu'))
+model.add(Dense(num_classes, activation='softmax'))
+...
+model.fit(X_train, y_train)  # Actual syntax is different
+model.predict(Y_test)        # Actual syntax is different
+</code></pre>
+
+Este modelo acierta el 88%
+
+Note:
+Concepto de 'capas', idea de pipeline
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Deep Learning mejor con Keras
+
+<pre><code>
+model = Sequential()
+model.add(Conv2D(64, kernel_size=(3, 3),
+                 activation='relu',
+                 input_shape=input_shape))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+model.add(Flatten())
+model.add(Dense(128, activation='relu'))
+model.add(Dense(num_classes, activation='softmax'))
+</code></pre>
+
+Este modelo acierta el >90%
+
+La elección de la 'arquitectura' es crucial. Los features son los mismos.
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Son tan buenas con imágenes!
+
+<br/>
+
+- Audio a imagen espectral
+- Texto a imagen estilo 'braile'
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Vendido! ¿por donde empiezo?
+
+ - Por la charla que sigue! (Ariel Rossanigo)
+ - Por la charla de Fisa esta tarde
+ - Un tutorial de MNIST usando Keras
+ - Keras tiene unos ejemplos maravillosos en github <small>https://github.com/fchollet/keras/tree/master/examples</small>
+ - Solo empezá por imágenes!
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Final remarks
+
+<br/>
+
+#### Machine Learning: Construir funciones sin programarlas explicitamente, a partir de ejemplos
+
+<br/>
+
+#### Python tiene las libs más reconocidas para Machine Learning
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+
+## Gracias!
+
+#### Preguntas y comentarios bienvenidos
+
+</script></section>
+
+
+<!-- END OF SLIDES ========================================================= -->
+<!-- END OF SLIDES ========================================================= -->
+<!-- END OF SLIDES ========================================================= -->
+
+
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				controls: false,
+				history: true,
+				transition: 'none',
+				transitionSpeed: 'fast',
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
